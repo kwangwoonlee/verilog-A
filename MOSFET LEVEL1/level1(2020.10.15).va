@@ -1,0 +1,24 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module level1(d, g, s);
+	parameter real Vto = 0.3 from (-inf:inf); // Threshold voltage
+	parameter real KP = 2.0718e-5 from [0:inf);// Transconductance
+	parameter real Lambda = 0.0 from [0:inf); // Channel modulation
+	parameter real Weff = 1e-6 from [0:inf); // Width
+	parameter real Leff = 5e-6 from [0:inf); // Length
+
+ 	electrical d, g, s;
+	real Id, Vgs, Vds;
+	analog begin
+ 	 Vgs = V(g,s);
+	 Vds = V(d,s);
+	 if (Vgs <= Vto)
+	 	Id = 0.0;
+	 else if (Vgs > Vto && Vds < Vgs-Vto)		
+		Id = KP*Weff/Leff*(1+Lambda*Vds)*(Vgs-Vto-Vds/2)*Vds;
+	else if (Vgs > Vto && Vgs-Vto <= Vds)
+		Id = KP/2*Weff/Leff*(1+Lambda*Vds)*(Vgs-Vto)*(Vgs-Vto); 		         
+	 I(d,s) <+ Id;
+ 	end
+endmodule                         
